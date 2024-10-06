@@ -18,17 +18,23 @@ unordered_map<int, Node*> tree;
 
 bool canAddNode(int node_id){
     int min_depth = tree[node_id]->max_depth;
-    int count = 1;
-
-    while(tree[node_id]->p_id != -1){
-        node_id = tree[node_id]->p_id;
-
-        if(min_depth > tree[node_id]->max_depth){
-            min_depth = tree[node_id]->max_depth;
-            count++;
-        }
+    if(min_depth == 1){
+        return false;
     }
-    return min_depth > count;
+    else{
+        int count = 1;
+
+        while(tree[node_id]->p_id != -1){
+            node_id = tree[node_id]->p_id;
+
+            if(min_depth > tree[node_id]->max_depth){
+                min_depth = tree[node_id]->max_depth;
+                count++;
+            }
+        }
+        return min_depth >= count;
+    }
+
 }
 
 // 서브트리 내 색깔 변경
