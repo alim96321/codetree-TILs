@@ -1,135 +1,87 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <queue>
+#include <unordered_map>
+#include <unordered_set>
 #include <cmath>
 
 using namespace std;
 
 struct Node{
-    int m_id, p_id, color, max_depth;
-    
+    int m_id, color, max_depth; // p_id는 해쉬의 key로 사용
+    vector<int> children;
+
     // 생성자
-    Node(int a, int b, int c, int d) : m_id(a), p_id(b), color(c), max_depth(d) {}
+    Node(int a, int b, int c) : m_id(a), color(b), max_depth(c) {}
 };
 
-void changeColor(vector<pair<int, vector<Node>>>& tree, int m, int c){
-    queue<int> q;
-    q.push(m);
+unordered_map<int, Node*> tree;
 
-    while(!q.empty()){
-        int num = q.front();
-        q.pop();
-        for(int i = 0; i < tree.size(); i++){
-            if(num == tree[i].first){
-                for(int j = 0; j < tree[i].second.size(); j++){ // 자기 자신과 서브트리의 색깔 변경
-                    tree[i].second[j].color = c;
-                    if(j == 0){
-                        continue;
-                    }
-                    else{
-                        q.push(tree[i].second[j].m_id);
-                    }
-                } // m_id가 num인 노드와 서브트리의 색깔 변화
-                for(int p = 0; p < tree.size(); p++){
-                    for(int z = 0; z < tree[p].second.size(); z++){
-                        if(tree[p].second[z].m_id == m){
-                            tree[p].second[z].color = c;
-                        }
-                    }
-                } // m_id가 num인 노드를 가지고 있는 루트의 서비트리에서 색깔 변화
-                break;
-            }
-        }
+// 서브트리 내 색깔 변경
+void changeColor(int m, int c){
+    Node* node = tree[m];
+    node->color = c;
+    for(int child : node->children){
+        changeColor(child, c); // DFS로 자식 순회
     }
-    return;
 }
 
-int calculateTree(const vector<pair<int, vector<Node>>>& tree){
-    queue<int> q;
-    int i = 0;
-    int sum = 0;
-    vector<int> arr;
-
-    while(i != tree.size()){
-        q.push(tree[i].first);
-        while(!q.empty()){
-            int num = q.front();
-            q.pop();
-            for(int j = 0; j < tree.size(); j++){
-                if(num == tree[j].first){
-                    arr.emplace_back(tree[j].second[0].color);
-                    for(int k = 0; k < tree[j].second.size(); k++){
-                        if(k == 0){
-                            continue;
-                        }
-                        else{
-                            q.push(tree[j].second[k].m_id);
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        sort(arr.begin(), arr.end());
-        arr.erase(unique(arr.begin(), arr.end()), arr.end());
-        sum += pow(arr.size(), 2);
-        arr.clear();
-        i++;
+void countUniqueColors(int m, unordered_set<int>& uniqueColors){
+    Node* node = tree[m];
+    uniqueColors.insert(node->color);
+    for(int child : node->children){
+        countUniqueColors(child, uniqueColors); // DFS로 자식 순회
     }
-    return sum;
 }
 
-int main() {
+int calculateTree(){
+    int totalScore = 0;
+    for(auto& it : tree){
+        Node* node = it.second;
+        unordered_set<int> uniqueColors;
+        countUniqueColors(node->m_id, uniqueColors);
+        totalScore += pow(uniqueColors.size(), 2);
+    }
+    return totalScore;
+}
+
+int main(){
     ios_base::sync_with_stdio(false);
-    
+    cin.tie(nullptr);
+
     int n;
     int order;
-    int m, p, c, d;
-
-    vector<pair<int, vector<Node>>> tree;
-
     cin >> n;
 
     for(int i = 0; i < n; i++){
         cin >> order;
+        
         if(order == 100){
+            int m, p, c, d;
             cin >> m >> p >> c >> d;
-            Node nd(m, p, c, d);
-            vector<Node> st;
-            st.emplace_back(nd);
-
             if(p == -1){
-                // 새 트리 만들기
-                tree.emplace_back(make_pair(m, st));
+                // 새 트리 추가
+                tree[m] = new Node(m, c, d);
             }
             else{
-                if(!tree.empty()){
-                    for(int j = 0; j < tree.size();j++){
-                        if(p == tree[j].first && tree[j].second[0].max_depth != 1){
-                            tree[j].second.emplace_back(nd);
-                            tree.emplace_back(make_pair(m, st));
-                        }
-                    }
+                Node* parent = tree[p];
+                if(parent->max_depth > 1){
+                    tree[m] = new Node(m, c, d);
+                    parent->children.emplace_back(m);
                 }
-                else continue;
             }
         }
         else if(order == 200){
+            int m, c;
             cin >> m >> c;
-            changeColor(tree, m, c);
+            changeColor(m, c);
         }
         else if(order == 300){
+            int m;
             cin >> m;
-            for(int j = 0; j < tree.size(); j++){
-                if(m == tree[j].first){
-                    cout << tree[j].second[0].color << endl;
-                    break;
-                }
-            }
+            cout << tree[m]->color << endl;
         }
         else if(order == 400){
-            cout << calculateTree(tree) << endl;
+            cout << calculateTree() << endl;
         }
     }
 
