@@ -106,7 +106,7 @@ int main() {
             else{
                 if(!tree.empty()){
                     for(int j = 0; j < tree.size();j++){
-                        if(p == tree[j].first && d <= tree[j].second[0].max_depth){
+                        if(p == tree[j].first && tree[j].second[0].max_depth != 1){
                             tree[j].second.emplace_back(nd);
                             tree.emplace_back(make_pair(m, st));
                         }
