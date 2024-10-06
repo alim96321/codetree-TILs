@@ -7,14 +7,29 @@
 using namespace std;
 
 struct Node{
-    int m_id, color, max_depth; // p_id는 해쉬의 key로 사용
+    int m_id, p_id, color, max_depth; // p_id는 해쉬의 key로 사용
     vector<int> children;
 
     // 생성자
-    Node(int a, int b, int c) : m_id(a), color(b), max_depth(c) {}
+    Node(int a, int b, int c, int d) : m_id(a), color(b), max_depth(c), p_id(d) {}
 };
 
 unordered_map<int, Node*> tree;
+
+bool canAddNode(int node_id){
+    int min_depth = tree[node_id]->max_depth;
+    int count = 1;
+
+    while(tree[node_id]->p_id != -1){
+        node_id = tree[node_id]->p_id;
+
+        if(min_depth > tree[node_id]->max_depth){
+            min_depth = tree[node_id]->max_depth;
+            count++;
+        }
+    }
+    return min_depth > count;
+}
 
 // 서브트리 내 색깔 변경
 void changeColor(int m, int c){
@@ -60,12 +75,12 @@ int main(){
             cin >> m >> p >> c >> d;
             if(p == -1){
                 // 새 트리 추가
-                tree[m] = new Node(m, c, d);
+                tree[m] = new Node(m, c, d, -1);
             }
             else{
                 Node* parent = tree[p];
-                if(parent->max_depth > 1){
-                    tree[m] = new Node(m, c, d);
+                if(canAddNode(p)){
+                    tree[m] = new Node(m, c, d, p);
                     parent->children.emplace_back(m);
                 }
             }
