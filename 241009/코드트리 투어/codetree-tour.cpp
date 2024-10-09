@@ -96,12 +96,14 @@ int main() {
                 product.erase(id);
                 
                 int num = thing.size();
+                vector<Products> tmp;
                 for(int j = 0; j < num; j++){
                     if(thing[j].id == id){
-                        thing.erase(thing.begin() + j);
-                        break;
+                        continue;
                     }
+                    tmp.emplace_back(Products(thing[j].plus, thing[j].id));
                 }
+                thing = tmp;
                 
                 break;
             }
