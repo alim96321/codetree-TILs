@@ -1,7 +1,9 @@
 #include <iostream>
 #include <queue>
+#include <algorithm>
 #include <climits>
 #include <map>
+//#include <cstdio>
 
 using namespace std;
 
@@ -54,6 +56,7 @@ void Dijkstra(int distance[N_MAX],int st){
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
+    //freopen("input.txt", "r", stdin);
 
     int distance[N_MAX];
 
@@ -95,19 +98,29 @@ int main() {
                 break;
             }
             case 400:{
-                if(ppq.empty()){
-                    cout << -1 << '\n';
-                }
-                else{
-                    pair<int, int> np = ppq.top();
-                    if((distance[product[np.second].second] != INT_MAX) && (np.first >= 0) && (arr_id[np.second])){
-                        cout << np.second << '\n';
-                        arr_id[np.second] = false;
-                        ppq.pop();
-                        product.erase(np.second);
+                while(true){
+                    if(ppq.empty()){
+                        cout << -1 << '\n';
+                        break;
                     }
                     else{
-                        cout << -1 << '\n';
+                        pair<int, int> np = ppq.top();
+                        if(!arr_id[np.second]){
+                            ppq.pop();
+                            continue;
+                        }
+
+                        if((distance[product[np.second].second] != INT_MAX) && (np.first >= 0)){
+                            cout << np.second << '\n';
+                            arr_id[np.second] = false;
+                            ppq.pop();
+                            product.erase(np.second);
+                            break;
+                        }
+                        else{
+                            cout << -1 << '\n';
+                            break;
+                        }
                     }
                 }
                 break;
