@@ -77,6 +77,8 @@ int main() {
                     int v, u, w;
                     cin >> v >> u >> w;
                     graph[v].emplace_back(u, w);
+                    if(v != u)
+                        graph[u].emplace_back(v, w);
                 }
                 Dijkstra(distance, start);
                 break;
